@@ -8,29 +8,53 @@ enum GridEntry {
     Empty,
     Near(usize),
     Neutral,
-    Infinity
+    Infinity,
+}
+
+pub fn advent6b() -> Result<usize, Error> {
+    let f = File::open("input6.txt")?;
+    let mut points: Vec<(usize, usize)> = Vec::new();
+    let (max_x, max_y) = load_points(&f, &mut points)?;
+
+    let mut grid_raw = vec![GridEntry::Empty; (max_x + 1) * (max_y + 1)];
+    let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(max_y + 1).collect();
+    let grid: &mut [&mut [_]] = grid_base.as_mut_slice();
+
+    for px in 0..grid.len() {
+        for py in 0..grid[px].len() {
+            grid[px][py] = GridEntry::Near(points.iter().map(|&x| manhattan_distance(x, (px, py))).sum());
+        }
+    }
+
+    let predicate = |x| {
+        match x {
+            GridEntry::Near(n) => n < 10000,
+            _ => false
+        }
+    };
+
+    for px in 0..grid.len() {
+        for py in 0..grid[px].len() {
+            flood_fill(grid, (px, py), predicate, GridEntry::Infinity);
+        }
+    }
+
+    let mut count = 0;
+    for px in 0..grid.len() {
+        for py in 0..grid[px].len() {
+            if grid[px][py] == GridEntry::Infinity {
+                count += 1
+            }
+        }
+    }
+
+    return Ok(count);
 }
 
 pub fn advent6a() -> Result<usize, Error> {
     let f = File::open("input6.txt")?;
-
     let mut points: Vec<(usize, usize)> = Vec::new();
-    let mut max_x = 0;
-    let mut max_y = 0;
-
-    for buffer in BufReader::new(f).lines() {
-        let line = buffer?;
-
-        let x: usize;
-        let y: usize;
-
-        scan!(line.bytes() => "{}, {}", x, y);
-
-        max_x = max_x.max(x);
-        max_y = max_y.max(y);
-
-        points.push((x, y));
-    }
+    let (max_x, max_y) = load_points(&f, &mut points)?;
 
     let mut grid_raw = vec![GridEntry::Empty; (max_x + 1) * (max_y + 1)];
     let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(max_y + 1).collect();
@@ -91,7 +115,6 @@ pub fn advent6a() -> Result<usize, Error> {
 
     for px in 0..grid.len() {
         for py in 0..grid[0].len() {
-
             match grid[px][py] {
                 GridEntry::Near(n) => counts[n] += 1,
                 _ => {}
@@ -102,6 +125,26 @@ pub fn advent6a() -> Result<usize, Error> {
     return Ok(*counts.iter().max().unwrap_or(&0));
 }
 
+fn load_points(f: &File, points: &mut Vec<(usize, usize)>) -> Result<(usize, usize), Error> {
+    let mut max_x = 0;
+    let mut max_y = 0;
+    for buffer in BufReader::new(f).lines() {
+        let line = buffer?;
+
+        let x: usize;
+        let y: usize;
+
+        scan!(line.bytes() => "{}, {}", x, y);
+
+        max_x = max_x.max(x);
+        max_y = max_y.max(y);
+
+        points.push((x, y));
+    }
+
+    return Ok((max_x, max_y));
+}
+
 fn manhattan_distance(p: (usize, usize), q: (usize, usize)) -> usize {
     let x_diff = if p.0 < q.0 { q.0 - p.0 } else { p.0 - q.0 };
     let y_diff = if p.1 < q.1 { q.1 - p.1 } else { p.1 - q.1 };
@@ -109,7 +152,7 @@ fn manhattan_distance(p: (usize, usize), q: (usize, usize)) -> usize {
 }
 
 fn flood_fill<P>(grid: &mut [&mut [GridEntry]], node: (usize, usize), predicate: P, replacement: GridEntry) where
-        P: Fn(GridEntry) -> bool {
+    P: Fn(GridEntry) -> bool {
 //fn flood_fill(grid: &mut [&mut [GridEntry]], node: (usize, usize), target: GridEntry, replacement: GridEntry) {
 
     if !predicate(grid[node.0][node.1]) {
@@ -157,8 +200,7 @@ fn check_paint_queue_node<P>(
     candidate: (usize, usize),
     predicate: &P, replacement: GridEntry,
     node_q: &mut VecDeque<(usize, usize)>) where
-        P: Fn(GridEntry) -> bool {
-
+    P: Fn(GridEntry) -> bool {
     if predicate(grid[candidate.0][candidate.1]) {
         grid[candidate.0][candidate.1] = replacement;
         node_q.push_back(candidate);

@@ -31,6 +31,11 @@ fn main() {
     }
 
     match advent6::advent6a() {
+        Ok(n) => println!("Advent6a: {:?}", n),
+        Err(e) => println!("{}", e)
+    }
+
+    match advent6::advent6b() {
         Ok(n) => println!("Advent6b: {:?}", n),
         Err(e) => println!("{}", e)
     }
