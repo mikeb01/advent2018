@@ -1,7 +1,5 @@
 use std::io::{BufRead, BufReader, Error};
 use std::fs::File;
-use std::iter::FromIterator;
-use std::collections::VecDeque;
 use std::collections::BTreeMap;
 
 
@@ -74,8 +72,6 @@ pub fn advent7b() -> Result<i32, Error> {
         }
     }
 
-    let mut removed: Vec<char> = Vec::new();
-
     let mut workers = [('x', 0); 5];
     let mut time_taken = 0;
 
@@ -87,7 +83,7 @@ pub fn advent7b() -> Result<i32, Error> {
         to_remove.dedup();
 
         while !to_remove.is_empty() {
-            let next_free_worker = workers.iter().position(|(step, time)| *time <= 0);
+            let next_free_worker = workers.iter().position(|(_step, time)| *time <= 0);
             if next_free_worker.is_some() {
                 let candidate_step = to_remove.pop().unwrap();
                 if workers.iter().find(|(c, _time)| *c == candidate_step).is_none() {
@@ -111,11 +107,9 @@ pub fn advent7b() -> Result<i32, Error> {
         }
 
         time_taken += 1;
-
-        println!("{:?}", workers);
     }
 
-    let remaining = workers.iter().map(|(c, time)| time).max().unwrap_or(&0);
+    let remaining = workers.iter().map(|(_c, time)| time).max().unwrap_or(&0);
 
     return Ok(time_taken + remaining);
 }
