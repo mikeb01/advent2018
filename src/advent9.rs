@@ -1,5 +1,4 @@
-use std::io::{BufRead, BufReader, Error};
-use std::fs::File;
+use std::io::Error;
 use std::iter::Iterator;
 //use std::iter::FromIterator;
 //use std::collections::VecDeque;
@@ -13,32 +12,6 @@ pub fn advent9a() -> Result<usize, Error> {
 
 pub fn advent9b() -> Result<usize, Error> {
     run_game2(403, 71920 * 100)
-}
-
-fn run_game(num_players: usize, max_points: usize) -> Result<usize, Error> {
-    let mut players: Vec<usize> = vec![0; num_players];
-    let mut marbles: Vec<usize> = Vec::with_capacity(max_points);
-    marbles.push(0);
-    marbles.push(1);
-    let mut current = 1;
-    for points in 2..(max_points + 1) {
-
-        if points % 23 == 0 {
-            let to_remove_index = if current < 7 { 7 - current } else { current - 7 };
-            let removed = marbles.remove(to_remove_index);
-            current = to_remove_index % marbles.len();
-            let player_index = points % players.len();
-            players[player_index] += (points + removed);
-        } else {
-            let mut next = current + 2;
-            next = if next > marbles.len() { 1 } else { next };
-            marbles.insert(next, points);
-
-            current = next;
-        }
-    }
-
-    return Ok(*players.iter().max().unwrap_or(&0));
 }
 
 struct Node {
@@ -55,8 +28,6 @@ fn run_game2(num_players: usize, max_points: usize) -> Result<usize, Error> {
     marbles.push(Node { value: 1, next: 0, prev: 0 });
 
     let mut current = 1;
-    let mut points = 2;
-    let mut head = 0;
 
     for points in 2..(max_points + 1) {
 
@@ -76,7 +47,7 @@ fn run_game2(num_players: usize, max_points: usize) -> Result<usize, Error> {
             current = right;
 
             let player_index = points % players.len();
-            players[player_index] += (points + score);
+            players[player_index] += points + score;
 
         } else {
             let left = marbles[current].next;
@@ -91,29 +62,7 @@ fn run_game2(num_players: usize, max_points: usize) -> Result<usize, Error> {
             current = new_entry;
         }
 
-//        print_marbles(&marbles, head, current);
     }
 
     return Ok(*players.iter().max().unwrap_or(&0));
-}
-
-fn print_marbles(marbles: &Vec<Node>, head: usize, current: usize) {
-
-    let mut index = head;
-
-    loop {
-        if index == current {
-            print!("({}) ", marbles[index].value);
-        } else {
-            print!("{} ", marbles[index].value);
-        }
-
-        index = marbles[index].next;
-
-        if index == head {
-            break;
-        }
-    }
-
-    println!();
 }
