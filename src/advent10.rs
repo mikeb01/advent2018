@@ -31,7 +31,6 @@ pub fn advent10a() -> Result<usize, Error> {
     let mut prev_width = std::usize::MAX;
     let mut prev_height = std::usize::MAX;
     let mut prev_min = (0i32, 0i32);
-    let mut prev_max = (0i32, 0i32);
     let mut wait_time = 0;
 
     for j in 0..100000 {
@@ -64,7 +63,6 @@ pub fn advent10a() -> Result<usize, Error> {
         prev_width = width;
         prev_height = height;
         prev_min = min;
-        prev_max = max;
 
         for i in 0..positions.len() {
             let x_p = positions[i].0 + velocities[i].0;
