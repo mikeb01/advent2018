@@ -11,6 +11,7 @@ pub mod advent7;
 pub mod advent8;
 pub mod advent9;
 pub mod advent10;
+pub mod advent11;
 
 fn main() {
 //    advent1::advent1a();
@@ -74,5 +75,13 @@ fn main() {
         Err(e) => println!("{}", e)
     }
 
-//    advent9::advent9c();
+    match advent11::advent11a() {
+        Ok(n) => println!("Advent11a: {:?}", n),
+        Err(e) => println!("{}", e)
+    }
+
+//    match advent11::advent11b() {
+//        Ok(n) => println!("Advent11b: {:?}", n),
+//        Err(e) => println!("{}", e)
+ //    }
 }
